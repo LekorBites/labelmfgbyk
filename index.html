@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YONGMAMA Label</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: alat kilang yang tenang dan jelas, satu kerja: print label.
+   IDEA: gulungan label termal yang keluar dari mesin Xprinter.
+   PICTURE: label sebenar dibesarkan, duduk atas jalur gulungan gelap.
+   COLOUR and TYPE: putih label, arang mesin, merah cop MFG; Inter + Roboto Condensed.
+   LAYOUT: preview besar di atas, borang satu lajur di bawah, butang besar. */
+:root{color-scheme:light dark;
+  --bg:light-dark(#f4f4f2,#121314);--card:light-dark(#fff,#1c1e20);--ink:light-dark(#16181a,#eceef0);
+  --mut:light-dark(#61666c,#9aa0a6);--line:light-dark(#d9dbde,#34383c);--roll:#26292c;--acc:#c8322b;--acc2:#a52822;--ok:#1f7a45}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,"Segoe UI",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:880px;margin:0 auto;padding:clamp(18px,3vw,36px) max(4vw,14px) 40px}
+h1{font-size:clamp(24px,4vw,32px);line-height:1.05;margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin:0 0 20px;font-size:15px}
+.roll{background:var(--roll);border-radius:14px;padding:clamp(22px,5vw,44px) 12px;display:flex;justify-content:center;align-items:center;position:relative;overflow:hidden}
+.roll::before{content:"";position:absolute;inset:0 0 auto;height:10px;background:linear-gradient(#0006,#0000)}
+.prev{width:min(100%,560px);aspect-ratio:52.5/20;background:#fff;border-radius:3px;box-shadow:0 10px 28px #0007;display:block}
+.dims{color:#c9ccd0;font-size:13px;position:absolute;right:14px;bottom:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:clamp(16px,3vw,26px);margin-top:18px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 18px}
+.full{grid-column:1/-1}
+label{display:block;font-size:13px;font-weight:600;color:var(--mut);margin-bottom:6px}
+input{width:100%;font:600 18px/1.2 Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;min-height:48px}
+input:focus-visible,button:focus-visible{outline:3px solid color-mix(in srgb,var(--acc) 45%,transparent);outline-offset:2px;border-color:var(--acc)}
+.row{display:flex;gap:8px}.row input{flex:1}.row[hidden],input[hidden]{display:none}
+.lhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}.lhead label{margin:0}
+.seg{display:inline-flex;flex-wrap:wrap;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.seg .b{border:0;border-radius:0;min-height:40px;font-size:14px}.seg .b.on{background:var(--ink);color:var(--bg)}
+.note{font-size:13px;color:var(--mut)}
+.chk{display:flex;align-items:center;gap:8px;margin:10px 0 0;font-size:14px;color:var(--ink);font-weight:500;cursor:pointer}
+.chk input{width:20px;height:20px;min-height:0;padding:0;accent-color:var(--acc)}
+.b{font:600 15px Inter,system-ui,sans-serif;min-height:48px;padding:0 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;white-space:nowrap}
+.b:hover{border-color:var(--mut)}
+.chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:8px}
+.chips .b.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.acts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:20px}
+.go{font:700 19px Inter,system-ui,sans-serif;min-height:60px;border:0;border-radius:12px;color:#fff;background:var(--acc);cursor:pointer;letter-spacing:.02em}
+.go:hover{background:var(--acc2)}
+.go.alt{background:var(--ink);color:var(--bg)}
+.go[hidden]{display:none}.acts.one{grid-template-columns:repeat(2,minmax(0,1fr))}
+.msg{min-height:22px;margin-top:12px;font-size:14px;color:var(--mut)}
+.msg.err{color:var(--acc)}.msg.ok{color:var(--ok)}
+.tips{margin-top:18px;font-size:14px;color:var(--mut);line-height:1.6}
+.tips b{color:var(--ink)}
+.spec{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--mut);margin-top:14px}
+#printArea{display:none}
+@page{margin:0}
+@media print{html,body{background:#fff}.wrap{display:none}#printArea{display:block}
+  #printArea img{display:block;width:52.5mm;height:20mm;break-after:page;page-break-after:always}
+  #printArea img:last-child{break-after:auto;page-break-after:auto}}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.acts{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>YONGMAMA Label</h1>
+  <p class="sub">Isi, tekan print. Saiz 5.25 × 2 cm. Margin atas je boleh ubah.</p>
+
+  <div class="roll">
+    <canvas id="prev" class="prev" width="1050" height="400" aria-label="Preview label"></canvas>
+    <span class="dims">52.5 × 20 mm</span>
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <div class="full">
+        <div class="lhead">
+          <label for="tarikh" id="lblT">Tarikh MFG</label>
+          <div class="seg" id="seg" role="group" aria-label="Cara isi tarikh">
+            <button class="b" type="button" data-m="date">Pilih tarikh</button>
+            <button class="b" type="button" data-m="text">Taip teks</button>
+          </div>
+        </div>
+        <div class="row" id="dateRow">
+          <input type="date" id="tarikh">
+          <button class="b" id="today" type="button">Hari ini</button>
+        </div>
+        <input id="teks" autocomplete="off" spellcheck="false" placeholder="cth: 13/10/2026 atau 13 OKT 2026" hidden>
+        <label class="chk"><input type="checkbox" id="mfg" checked> Letak "MFG" di depan</label>
+      </div>
+      <div><label for="kod">Kod</label><input id="kod" autocomplete="off" spellcheck="false"></div>
+      <div><label for="berat">Berat</label><input id="berat" autocomplete="off" spellcheck="false"></div>
+      <div>
+        <label for="top">Margin atas (cm)</label>
+        <input type="number" id="top" step="0.1" min="0" max="1.2" inputmode="decimal">
+        <div class="chips" id="chips">
+          <button class="b" type="button" data-v="0.3">0.3</button>
+          <button class="b" type="button" data-v="0.4">0.4</button>
+          <button class="b" type="button" data-v="0.5">0.5</button>
+          <button class="b" type="button" data-v="0.6">0.6</button>
+        </div>
+      </div>
+      <div><label for="copies">Bil. salinan</label><input type="number" id="copies" min="1" max="500" step="1" inputmode="numeric"></div>
+      <div class="full">
+        <div class="lhead">
+          <label id="lblR">Arah print</label>
+          <div class="seg" id="rotseg" role="group" aria-labelledby="lblR">
+            <button class="b" type="button" data-r="-1">Auto (macam Excel)</button>
+            <button class="b" type="button" data-r="0">Biasa</button>
+            <button class="b" type="button" data-r="90">Putar ↻ 90°</button>
+            <button class="b" type="button" data-r="270">Putar ↺ 90°</button>
+          </div>
+        </div>
+        <div class="note"><b>Auto</b> ikut kertas &amp; Portrait printer macam Excel (cuba ni dulu). Kalau masih menegak, cuba pilihan lain. Pilihan diingat.</div>
+      </div>
+    </div>
+
+    <div class="acts" id="acts">
+      <button class="go" id="btnPrint" type="button" hidden>PRINT</button>
+      <button class="go alt" id="btnPdf" type="button">PDF</button>
+      <button class="go alt" id="btnPng" type="button">GAMBAR (PNG)</button>
+    </div>
+    <div class="msg" id="msg" role="status"></div>
+
+    <div class="spec">
+      <span>Font Aptos Narrow / Roboto Condensed 14 bold</span>
+      <span>Kiri 0.5 · Kanan 0.4 · Bawah 0 cm</span>
+      <span>Skala 100%</span>
+    </div>
+  </div>
+
+  <div class="tips" id="tips">
+    <b>Cara print PDF:</b> buka fail PDF, tekan Ctrl+P, pilih <b>Xprinter XP-420B</b>, set saiz <b>Actual size / 100%</b> (bukan "Fit"), kertas <b>5.25 × 2 cm</b>, kemudian Print.
+  </div>
+</div>
+
+<div id="printArea"></div>
+
+<script>
+{
+const KEY='yongmamaLabel_v1';
+const W=52.5,H=20,LEFT=5,RIGHT=4,ROW=6.6,PT14=14*25.4/72,LINE=0.26;
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,'0');
+const todayISO=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const fmt=iso=>{if(!iso)return'';const p=iso.split('-');return p[2]+'/'+p[1]+'/'+p[0]};
+const FONT='"Aptos Narrow","Roboto Condensed","Arial Narrow","Bahnschrift SemiCondensed",Arial,sans-serif';
+const framed=(()=>{try{return window.self!==window.top}catch(e){return true}})();
+
+let mode='date',rot=-1;
+function setRot(v){
+  v=parseInt(v,10);rot=v===0||v===90||v===270?v:-1;
+  for(const b of document.querySelectorAll('#rotseg .b'))b.classList.toggle('on',parseInt(b.dataset.r,10)===rot);
+}
+const turned=()=>rot===90||rot===270;
+const pageMM=()=>turned()?[H,W]:[W,H];
+function outCanvas(r){
+  const c=hiRes(r);if(!turned())return c;
+  const o=document.createElement('canvas');o.width=c.height;o.height=c.width;
+  const g=o.getContext('2d');
+  if(rot===90){g.translate(o.width,0);g.rotate(Math.PI/2)}else{g.translate(0,o.height);g.rotate(-Math.PI/2)}
+  g.drawImage(c,0,0);return o;
+}
+function setMode(m){
+  mode=m==='text'?'text':'date';
+  $('dateRow').hidden=mode!=='date';$('teks').hidden=mode!=='text';
+  $('lblT').htmlFor=mode==='date'?'tarikh':'teks';
+  for(const b of document.querySelectorAll('#seg .b'))b.classList.toggle('on',b.dataset.m===mode);
+}
+function load(){
+  let s={};try{s=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){}
+  $('tarikh').value='';
+  $('teks').value='';
+  $('mfg').checked=s.mfg!==false;
+  $('kod').value=s.kod!=null?s.kod:'6JO2';
+  $('berat').value=s.berat!=null?s.berat:'10KG';
+  $('top').value=s.top!=null?s.top:'0.3';
+  $('copies').value=1;
+  setMode(s.mode);setRot(s.rot2);
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({mode,rot2:rot,mfg:$('mfg').checked,kod:$('kod').value,berat:$('berat').value,top:$('top').value}))}catch(e){}}
+const tarikhVal=()=>mode==='date'?fmt($('tarikh').value):$('teks').value.trim();
+
+function read(){
+  const top=parseFloat($('top').value),c=parseInt($('copies').value,10),tv=tarikhVal();
+  const r={l1:($('mfg').checked?'MFG ':'')+tv,l2:$('kod').value.trim()+'    '+$('berat').value.trim(),
+    top,copies:isNaN(c)||c<1?1:Math.min(c,500),err:''};
+  if(!tv)r.err=mode==='date'?'Pilih tarikh MFG dulu.':'Taip tarikh / teks MFG dulu.';
+  else if(!$('kod').value.trim()||!$('berat').value.trim())r.err='Kod atau berat kosong.';
+  else if(isNaN(top)||top<0||top>1.2)r.err='Margin atas mesti antara 0 hingga 1.2 cm.';
+  return r;
+}
+
+function draw(cv,r,dpmm){
+  cv.width=Math.round(W*dpmm);cv.height=Math.round(H*dpmm);
+  const g=cv.getContext('2d');
+  g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);
+  const t=(isNaN(r.top)?0.3:r.top)*10;
+  const x=LEFT*dpmm,w=(W-LEFT-RIGHT)*dpmm,y=t*dpmm,h=ROW*2*dpmm,lw=LINE*dpmm;
+  g.fillStyle='#000';g.textAlign='center';g.textBaseline='middle';
+  g.font='700 '+(PT14*dpmm)+'px '+FONT;
+  const cx=x+w/2;
+  g.fillText(r.l1,cx,y+ROW*0.5*dpmm+0.2*dpmm);
+  g.fillText(r.l2,cx,y+ROW*1.5*dpmm+0.2*dpmm);
+  return cv;
+}
+
+function render(){
+  const r=read();
+  draw($('prev'),r,20);
+  const m=$('msg');m.className='msg'+(r.err?' err':'');m.textContent=r.err;
+  for(const b of document.querySelectorAll('#chips .b'))b.classList.toggle('on',parseFloat(b.dataset.v)===r.top);
+  return r;
+}
+
+function hiRes(r){return draw(document.createElement('canvas'),r,600/25.4)}
+
+function makePdf(r){
+  const cv=outCanvas(r),iw=cv.width,ih=cv.height;
+  const url=cv.toDataURL('image/jpeg',0.95);
+  const bin=atob(url.split(',')[1]),jpg=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)jpg[i]=bin.charCodeAt(i);
+  const [mw,mh]=pageMM(),pw=(mw/25.4*72).toFixed(3),ph=(mh/25.4*72).toFixed(3);
+  const enc=new TextEncoder(),parts=[],offs=[];let len=0;
+  const push=x=>{const b=typeof x==='string'?enc.encode(x):x;parts.push(b);len+=b.length};
+  const n=r.copies,kids=[];
+  push('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n'.replace(/[\x80-\xff]/g,'A'));
+  // 1 catalog, 2 pages, 3 image, then per page: page + content
+  const obj=(id,body)=>{offs[id]=len;push(id+' 0 obj\n');push(body);push('\nendobj\n')};
+  for(let i=0;i<n;i++)kids.push((4+i*2)+' 0 R');
+  obj(1,'<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2,'<< /Type /Pages /Kids ['+kids.join(' ')+'] /Count '+n+' >>');
+  offs[3]=len;push('3 0 obj\n<< /Type /XObject /Subtype /Image /Width '+iw+' /Height '+ih+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpg.length+' >>\nstream\n');push(jpg);push('\nendstream\nendobj\n');
+  const cs='q '+pw+' 0 0 '+ph+' 0 0 cm /Im0 Do Q';
+  for(let i=0;i<n;i++){
+    const p=4+i*2,c=p+1;
+    obj(p,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+pw+' '+ph+'] /Resources << /XObject << /Im0 3 0 R >> >> /Contents '+c+' 0 R >>');
+    obj(c,'<< /Length '+cs.length+' >>\nstream\n'+cs+'\nendstream');
+  }
+  const total=4+n*2,xref=len;
+  let x='xref\n0 '+total+'\n0000000000 65535 f \n';
+  for(let i=1;i<total;i++)x+=String(offs[i]).padStart(10,'0')+' 00000 n \n';
+  push(x+'trailer\n<< /Size '+total+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF\n');
+  return new Blob(parts,{type:'application/pdf'});
+}
+
+let downloads=null;
+function setMsg(t,k){const m=$('msg');m.className='msg'+(k?' '+k:'');m.textContent=t}
+
+async function saveBlob(blob,name,okMsg){
+  if(downloads){
+    try{await downloads.save({filename:name,data:blob});setMsg(okMsg,'ok')}
+    catch(e){setMsg(e&&e.code==='declined'?'Muat turun dibatalkan.':'Fail tak dapat disimpan di sini. Cuba buka di browser komputer.','err')}
+    return;
+  }
+  try{
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    setMsg(okMsg,'ok');
+  }catch(e){setMsg('Fail tak dapat dimuat turun di paparan ini.','err')}
+}
+const fname=(r,ext)=>('LABEL '+r.l1).replace(/[\\\/:*?"<>|]+/g,'-').slice(0,80)+'.'+ext;
+async function doPng(){
+  const r=render();if(r.err)return;
+  save();
+  const blob=await new Promise(res=>outCanvas(r).toBlob(res,'image/png'));
+  if(!blob){setMsg('Gambar tak dapat dibuat.','err');return}
+  await saveBlob(blob,fname(r,'png'),'Gambar label dimuat turun (600 dpi, 5.25 × 2 cm).');
+}
+async function doPdf(){
+  const r=render();if(r.err)return;
+  save();
+  const blob=makePdf(r),name=('LABEL '+r.l1).replace(/[\\\/:*?"<>|]+/g,'-').slice(0,80)+'.pdf';
+  if(downloads){
+    try{await downloads.save({filename:name,data:blob});setMsg('PDF disimpan. Buka dan print pada Actual size / 100%.','ok')}
+    catch(e){setMsg(e&&e.code==='declined'?'Muat turun dibatalkan.':'PDF tak dapat disimpan di sini. Cuba buka di browser komputer.','err')}
+    return;
+  }
+  try{
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    setMsg('PDF dimuat turun. Buka dan print pada Actual size / 100%.','ok');
+  }catch(e){setMsg('PDF tak dapat dimuat turun di paparan ini.','err')}
+}
+
+function doPrint(){
+  const r=render();if(r.err)return;
+  save();
+  const src=outCanvas(r).toDataURL('image/png'),[mw,mh]=pageMM();
+  let ps=$('pagesz');if(!ps){ps=document.createElement('style');ps.id='pagesz';document.head.appendChild(ps)}
+  ps.textContent=(rot===-1?'@page{margin:0}':'@page{size:'+mw+'mm '+mh+'mm;margin:0}')+'@media print{#printArea img{width:'+mw+'mm!important;height:'+mh+'mm!important}}';
+  $('printArea').innerHTML=Array.from({length:r.copies},()=>'<img alt="" src="'+src+'">').join('');
+  setTimeout(()=>{window.print();$('copies').value=1;render()},50);
+}
+
+load();render();
+document.fonts&&document.fonts.load('700 20px "Roboto Condensed"').then(render,()=>{});
+document.fonts&&document.fonts.ready.then(render);
+
+if(!framed){$('btnPrint').hidden=false}else{$('acts').classList.add('one')}
+$('seg').addEventListener('click',e=>{const m=e.target.dataset&&e.target.dataset.m;if(m){setMode(m);save();render();(mode==='date'?$('tarikh'):$('teks')).focus()}});
+$('mfg').addEventListener('change',()=>{save();render()});
+$('rotseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.r;if(v!=null){setRot(v);save()}});
+for(const id of['tarikh','teks','kod','berat','top','copies']){
+  $(id).addEventListener('input',render);
+  $(id).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();framed?doPdf():doPrint()}});
+}
+$('today').addEventListener('click',()=>{$('tarikh').value=todayISO();render()});
+$('chips').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v){$('top').value=v;render()}});
+$('btnPrint').addEventListener('click',doPrint);
+$('btnPdf').addEventListener('click',doPdf);
+$('btnPng').addEventListener('click',doPng);
+
+if(window.claude&&window.claude.use){window.claude.use('downloads').then(d=>{downloads=d},()=>{})}
+}
+</script>
+</body>
+</html>
